@@ -15,6 +15,7 @@ import {
   Puzzle,
   HandMetal,
   Palette,
+  Download,
 } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 
@@ -26,8 +27,10 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDark, setIsDark] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
 
-  // Initialize theme
+  // Initialize theme & PWA install listener
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedTheme = localStorage.getItem("joynook_theme");
@@ -39,8 +42,32 @@ export function Header() {
         setIsDark(false);
         document.documentElement.classList.remove("dark");
       }
+
+      const standalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as any).standalone === true;
+      setIsStandalone(standalone);
+
+      const handleBeforeInstall = (e: Event) => {
+        e.preventDefault();
+        setDeferredPrompt(e);
+      };
+      window.addEventListener("beforeinstallprompt", handleBeforeInstall);
+      return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
     }
   }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === "accepted") {
+        setDeferredPrompt(null);
+      }
+    } else {
+      alert("To install JoyNook: Click your browser menu (⋮ or ⋯) and choose 'Install JoyNook' or 'Add to Home Screen'.");
+    }
+  };
 
   const toggleTheme = () => {
     const nextDark = !isDark;
@@ -134,8 +161,8 @@ export function Header() {
             })}
           </nav>
 
-          {/* Right Action Icons: Search, Favorites, Theme Toggle, Mobile Menu */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Right Action Icons: Search, Favorites, Theme Toggle, Install App, Mobile Menu */}
+          <div className="flex items-center gap-2 sm:gap-2.5">
             {/* Search Input (desktop) */}
             <form onSubmit={handleSearchSubmit} className="relative hidden md:block">
               <input
@@ -143,10 +170,22 @@ export function Header() {
                 placeholder="Search games..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-44 lg:w-56 pl-9 pr-3 py-1.5 text-sm rounded-full bg-white/90 dark:bg-[#1C1B33] border border-purple-100 dark:border-purple-900/40 text-brand-text-dark dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all"
+                className="w-40 lg:w-48 pl-9 pr-3 py-1.5 text-sm rounded-full bg-white/90 dark:bg-[#1C1B33] border border-purple-100 dark:border-purple-900/40 text-brand-text-dark dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-all"
               />
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </form>
+
+            {/* Install App Button (Desktop/Tablet) */}
+            {!isStandalone && (
+              <button
+                onClick={handleInstallClick}
+                title="Install JoyNook as Web App"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-50 hover:bg-brand-purple text-brand-purple hover:text-white dark:bg-purple-950/50 dark:text-purple-300 dark:hover:bg-brand-purple dark:hover:text-white border border-purple-200/60 dark:border-purple-800/40 text-xs font-bold transition-all shadow-sm active:scale-95"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Install App</span>
+              </button>
+            )}
 
             {/* Favorites Icon Button with Counter */}
             <Link
@@ -236,6 +275,16 @@ export function Header() {
                 {favorites.length}
               </span>
             </Link>
+
+            {!isStandalone && (
+              <button
+                onClick={handleInstallClick}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-brand-purple text-white shadow-md mt-2"
+              >
+                <Download className="w-4 h-4" />
+                <span>Install JoyNook Web App</span>
+              </button>
+            )}
           </div>
         </div>
       )}
