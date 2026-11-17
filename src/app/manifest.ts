@@ -1,11 +1,11 @@
 import { MetadataRoute } from "next";
+import { SITE_CONFIG } from "@/lib/siteConfig";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "JoyNook - Free Online Games & Relaxation",
-    short_name: "JoyNook",
-    description:
-      "Play free satisfying games, fidget toys, relaxing puzzles, and creative tools instantly in your browser. No downloads, no registration.",
+    name: SITE_CONFIG.name,
+    short_name: SITE_CONFIG.name,
+    description: SITE_CONFIG.description,
     start_url: "/",
     id: "/",
     display: "standalone",

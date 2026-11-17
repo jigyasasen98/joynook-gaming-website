@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 import { RotateCcw, Sparkles } from "lucide-react";
 import { sounds } from "@/lib/soundEffects";
+import { triggerHaptic } from "@/lib/haptics";
 
 const GRID_ROWS = 6;
 const GRID_COLS = 8;
@@ -29,6 +30,7 @@ export function VirtualBubbleWrapGame() {
     if (poppedState[index]) return; // already popped
 
     sounds.bubbleWrapSnap();
+    triggerHaptic("medium");
 
     setPoppedState((prev) => {
       const next = [...prev];
@@ -39,6 +41,7 @@ export function VirtualBubbleWrapGame() {
       if (allDone) {
         confetti({ particleCount: 60, spread: 70 });
         sounds.victoryFanfare();
+        triggerHaptic("success");
       }
 
       return next;

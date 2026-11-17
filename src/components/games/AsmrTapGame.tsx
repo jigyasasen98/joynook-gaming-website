@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { sounds } from "@/lib/soundEffects";
+import { triggerHaptic } from "@/lib/haptics";
 import { Sparkles } from "lucide-react";
 
 interface TapPad {
@@ -76,8 +77,10 @@ export function AsmrTapGame() {
     setActivePad(type);
     if (type === "plastic") {
       sounds.bubbleWrapSnap();
+      triggerHaptic("medium");
     } else {
       sounds.asmrTap(type);
+      triggerHaptic(type === "metal" ? "heavy" : "light");
     }
 
     setTapCounts((prev) => ({

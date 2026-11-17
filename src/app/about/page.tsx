@@ -1,9 +1,19 @@
 import { Sparkles, Heart, Shield, Zap, Smile } from "lucide-react";
+import { Metadata } from "next";
+import { SITE_CONFIG } from "@/lib/siteConfig";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "About Us - JoyNook",
   description:
     "Learn about JoyNook's mission to provide instant, calming, and delightful browser games and fidget toys with zero barrier to entry.",
+  alternates: {
+    canonical: `${SITE_CONFIG.url}/about`,
+  },
+  openGraph: {
+    title: "About JoyNook - Free Calming Web Games",
+    description: "Learn about JoyNook's mission to provide instant, calming browser games.",
+    url: `${SITE_CONFIG.url}/about`,
+  },
 };
 
 export default function AboutPage() {

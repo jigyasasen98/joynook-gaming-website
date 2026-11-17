@@ -1,9 +1,10 @@
 import { MetadataRoute } from "next";
 import { GAMES } from "@/data/gamesData";
 import { CATEGORIES } from "@/data/categoriesData";
+import { SITE_CONFIG } from "@/lib/siteConfig";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://joynook.com";
+  const baseUrl = SITE_CONFIG.url;
 
   // Static core routes
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -41,13 +42,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/privacy`,
       lastModified: new Date(),
       changeFrequency: "yearly",
-      priority: 0.4,
+      priority: 0.5,
     },
     {
       url: `${baseUrl}/terms`,
       lastModified: new Date(),
       changeFrequency: "yearly",
-      priority: 0.4,
+      priority: 0.5,
     },
   ];
 

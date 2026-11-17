@@ -1,8 +1,18 @@
 import { Shield } from "lucide-react";
+import { Metadata } from "next";
+import { SITE_CONFIG } from "@/lib/siteConfig";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Privacy Policy - JoyNook",
-  description: "Learn how JoyNook respects and protects your privacy.",
+  description: "Learn how JoyNook respects and protects your privacy with zero tracking and local-only storage.",
+  alternates: {
+    canonical: `${SITE_CONFIG.url}/privacy`,
+  },
+  openGraph: {
+    title: "Privacy Policy | JoyNook",
+    description: "JoyNook Privacy Policy and data protection standards.",
+    url: `${SITE_CONFIG.url}/privacy`,
+  },
 };
 
 export default function PrivacyPage() {

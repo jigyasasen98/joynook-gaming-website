@@ -16,8 +16,8 @@ function GamesDirectoryContent() {
 
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const [sortBy, setSortBy] = useState<"popular" | "rating" | "az" | "recent">(
-    (initialSort as "popular" | "rating" | "az" | "recent") || "popular"
+  const [sortBy, setSortBy] = useState<"popular" | "az" | "recent">(
+    (initialSort === "az" || initialSort === "recent" ? initialSort : "popular") as "popular" | "az" | "recent"
   );
   const [onlyFavorites, setOnlyFavorites] = useState(false);
 
@@ -30,7 +30,9 @@ function GamesDirectoryContent() {
     const cat = searchParams.get("category");
     if (cat !== null) setSelectedCategory(cat);
     const s = searchParams.get("sort");
-    if (s !== null) setSortBy(s as "popular" | "rating" | "az" | "recent");
+    if (s === "az" || s === "recent" || s === "popular") {
+      setSortBy(s);
+    }
   }, [searchParams]);
 
   // Filter & Sort games
@@ -62,9 +64,7 @@ function GamesDirectoryContent() {
 
     // Sorting
     if (sortBy === "popular") {
-      result.sort((a, b) => b.playsCount - a.playsCount);
-    } else if (sortBy === "rating") {
-      result.sort((a, b) => b.rating - a.rating);
+      result.sort((a, b) => (b.isFeatured || b.isPopular ? 1 : 0) - (a.isFeatured || a.isPopular ? 1 : 0));
     } else if (sortBy === "az") {
       result.sort((a, b) => a.title.localeCompare(b.title));
     } else if (sortBy === "recent") {
@@ -126,13 +126,12 @@ function GamesDirectoryContent() {
                 <span className="hidden sm:inline">Sort:</span>
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as "popular" | "rating" | "az" | "recent")}
+                  onChange={(e) => setSortBy(e.target.value as "popular" | "az" | "recent")}
                   className="bg-transparent text-brand-text-dark dark:text-white font-bold focus:outline-none cursor-pointer"
                 >
-                  <option value="popular">Most Popular</option>
-                  <option value="rating">Highest Rated</option>
-                  <option value="az">Alphabetical (A-Z)</option>
+                  <option value="popular">Featured First</option>
                   <option value="recent">Recently Added</option>
+                  <option value="az">Alphabetical (A-Z)</option>
                 </select>
               </div>
             </div>

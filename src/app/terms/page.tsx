@@ -1,8 +1,18 @@
 import { FileText } from "lucide-react";
+import { Metadata } from "next";
+import { SITE_CONFIG } from "@/lib/siteConfig";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Terms and Conditions - JoyNook",
   description: "Terms and conditions governing the use of the JoyNook website and games.",
+  alternates: {
+    canonical: `${SITE_CONFIG.url}/terms`,
+  },
+  openGraph: {
+    title: "Terms of Service | JoyNook",
+    description: "Terms and conditions governing JoyNook gaming platform usage.",
+    url: `${SITE_CONFIG.url}/terms`,
+  },
 };
 
 export default function TermsPage() {

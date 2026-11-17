@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
+import Script from "next/script";
 import { ChevronRight, ArrowLeft, Sparkles } from "lucide-react";
 import { CATEGORIES } from "@/data/categoriesData";
 import { getGamesByCategory } from "@/data/gamesData";
 import { GameCard } from "@/components/ui/GameCard";
+import { SITE_CONFIG } from "@/lib/siteConfig";
 
 interface CategoryPageProps {
   params: {
@@ -20,15 +22,34 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const cat = CATEGORIES.find((c) => c.slug === params.category);
-  if (!cat) return { title: "Category Not Found | JoyNook" };
+  if (!cat) return { title: `Category Not Found | ${SITE_CONFIG.name}` };
+
+  const pageUrl = `${SITE_CONFIG.url}/category/${cat.slug}`;
 
   return {
-    title: `${cat.name} - Free Online Games`,
-    description: cat.description,
+    title: `${cat.name} - Free Online Browser Games | ${SITE_CONFIG.name}`,
+    description: `Play free online ${cat.name.toLowerCase()} at ${SITE_CONFIG.name}. ${cat.description} Instant play, no download or login required.`,
+    alternates: {
+      canonical: pageUrl,
+    },
     openGraph: {
-      title: `${cat.name} | JoyNook`,
+      title: `${cat.name} - Play Free Online Games | ${SITE_CONFIG.name}`,
       description: cat.description,
-      url: `https://joynook.com/category/${cat.slug}`,
+      url: pageUrl,
+      siteName: SITE_CONFIG.name,
+      images: [
+        {
+          url: `${SITE_CONFIG.url}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: `${cat.name} on ${SITE_CONFIG.name}`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${cat.name} - Play Free Online Games | ${SITE_CONFIG.name}`,
+      description: cat.description,
     },
   };
 }
@@ -42,8 +63,38 @@ export default function CategoryPage({ params }: CategoryPageProps) {
 
   const games = getGamesByCategory(cat.slug);
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_CONFIG.url,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "All Games",
+        item: `${SITE_CONFIG.url}/games`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: cat.name,
+        item: `${SITE_CONFIG.url}/category/${cat.slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="py-8 sm:py-12">
+      <Script
+        id={`breadcrumb-${cat.slug}`}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import confetti from "canvas-confetti";
 import { sounds } from "@/lib/soundEffects";
+import { triggerHaptic } from "@/lib/haptics";
 import { Sparkles, Trophy, RotateCcw } from "lucide-react";
 
 interface Bubble {
@@ -189,9 +190,10 @@ export function BubblePopGame() {
         b.popped = true;
         poppedAny = true;
 
-        // Procedural audio pop
+        // Procedural audio pop & tactile haptics
         const pitch = 0.8 + Math.min(popStreak * 0.05, 1.2);
         sounds.bubblePop(pitch);
+        triggerHaptic(b.isGolden ? "medium" : "light");
 
         // Score calc
         const points = b.isGolden ? 50 : 10;

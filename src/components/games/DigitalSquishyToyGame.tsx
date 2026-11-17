@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { sounds } from "@/lib/soundEffects";
+import { triggerHaptic } from "@/lib/haptics";
 import { Palette, RotateCcw } from "lucide-react";
 
 const SQUISHY_COLORS = [
@@ -219,6 +220,7 @@ export function DigitalSquishyToyGame() {
       s.targetScaleX = 1.35;
       s.targetScaleY = 0.7; // squish horizontally
       sounds.squish(1.1);
+      triggerHaptic("medium");
     }
   };
 
@@ -255,6 +257,7 @@ export function DigitalSquishyToyGame() {
       s.velScaleX = -0.4; // boing bounce
       s.velScaleY = 0.4;
       sounds.squish(0.85);
+      triggerHaptic("light");
     }
   };
 

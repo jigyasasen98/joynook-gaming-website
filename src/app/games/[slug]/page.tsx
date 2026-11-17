@@ -3,17 +3,19 @@ import Link from "next/link";
 import { Metadata } from "next";
 import {
   ChevronRight,
-  Star,
   Sparkles,
   HelpCircle,
   Gamepad2,
   Smartphone,
   Monitor,
+  Zap,
+  CheckCircle2,
 } from "lucide-react";
 import { GAMES, getGameBySlug, getRelatedGames } from "@/data/gamesData";
 import { GameCard } from "@/components/ui/GameCard";
 import { GameControls } from "@/components/ui/GameControls";
 import { GameRenderer } from "@/components/games/GameRenderer";
+import { SITE_CONFIG } from "@/lib/siteConfig";
 
 interface GamePageProps {
   params: {
@@ -31,14 +33,34 @@ export async function generateMetadata({ params }: GamePageProps): Promise<Metad
   const game = getGameBySlug(params.slug);
   if (!game) return { title: "Game Not Found | JoyNook" };
 
+  const canonicalUrl = `${SITE_CONFIG.url}/games/${game.slug}`;
+
   return {
     title: `${game.title} - Play Free Online`,
     description: game.shortDescription,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: `${game.title} - Play Free Online | JoyNook`,
       description: game.shortDescription,
-      url: `https://joynook.com/games/${game.slug}`,
+      url: canonicalUrl,
       type: "website",
+      siteName: SITE_CONFIG.name,
+      images: [
+        {
+          url: `${SITE_CONFIG.url}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: `${game.title} on JoyNook`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${game.title} - Play Free Online | JoyNook`,
+      description: game.shortDescription,
+      images: [`${SITE_CONFIG.url}/og-image.png`],
     },
   };
 }
@@ -52,24 +74,56 @@ export default function GamePage({ params }: GamePageProps) {
 
   const relatedGames = getRelatedGames(game.slug, 4);
 
-  // Schema.org structured data for SEO
-  const jsonLd = {
+  // Schema.org structured data for SEO (100% compliant without fabricated reviews)
+  const gameSchema = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+    "@type": "VideoGame",
     name: game.title,
+    description: game.fullDescription,
+    genre: game.categoryName,
+    gamePlatform: ["Web Browser", "Mobile Browser", "Desktop"],
     applicationCategory: "GameApplication",
-    operatingSystem: "Any",
+    operatingSystem: "Any browser with HTML5 Canvas",
+    inLanguage: "en",
+    isAccessibleForFree: true,
+    url: `${SITE_CONFIG.url}/games/${game.slug}`,
     offers: {
       "@type": "Offer",
       price: "0",
       priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: game.rating,
-      ratingCount: Math.round(game.playsCount / 10),
-    },
-    description: game.fullDescription,
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_CONFIG.url,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Games",
+        item: `${SITE_CONFIG.url}/games`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: game.categoryName,
+        item: `${SITE_CONFIG.url}/category/${game.category}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: game.title,
+        item: `${SITE_CONFIG.url}/games/${game.slug}`,
+      },
+    ],
   };
 
   return (
@@ -77,7 +131,11 @@ export default function GamePage({ params }: GamePageProps) {
       {/* Structured Data injection */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(gameSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -109,9 +167,12 @@ export default function GamePage({ params }: GamePageProps) {
         {/* Game Title & Header Info */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
+            <div className="flex flex-wrap items-center gap-2 mb-1.5">
               <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-purple-50 dark:bg-purple-950/60 text-brand-purple dark:text-purple-300 border border-purple-200/50">
                 {game.categoryName}
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-mint-50 dark:bg-mint-950/60 text-mint-700 dark:text-mint-300 border border-mint-200/50 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3" /> Offline Ready
               </span>
               {game.badge && (
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-coral-50 dark:bg-coral-950/60 text-brand-coral border border-coral-200/50">
@@ -127,16 +188,13 @@ export default function GamePage({ params }: GamePageProps) {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-semibold self-start sm:self-center">
-            <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white dark:bg-[#1C1B33] border border-purple-100 dark:border-purple-900/60 shadow-sm">
-              <Star className="w-4 h-4 fill-brand-yellow text-brand-yellow" />
-              <span className="font-extrabold text-brand-text-dark dark:text-white">
-                {game.rating.toFixed(1)}
-              </span>
-              <span className="text-gray-400">/ 5.0</span>
+          {/* Genuine Game Meta Badges */}
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold self-start sm:self-center">
+            <div className="px-3 py-2 rounded-2xl bg-white dark:bg-[#1C1B33] border border-purple-100 dark:border-purple-900/60 shadow-sm text-brand-purple dark:text-purple-300 font-bold">
+              {game.difficulty}
             </div>
-            <div className="px-3 py-2 rounded-2xl bg-white dark:bg-[#1C1B33] border border-purple-100 dark:border-purple-900/60 shadow-sm text-brand-text-muted dark:text-gray-400">
-              {(game.playsCount / 1000).toFixed(0)}k plays
+            <div className="px-3 py-2 rounded-2xl bg-white dark:bg-[#1C1B33] border border-purple-100 dark:border-purple-900/60 shadow-sm text-brand-text-muted dark:text-gray-400 font-medium">
+              {game.playerMode}
             </div>
           </div>
         </div>

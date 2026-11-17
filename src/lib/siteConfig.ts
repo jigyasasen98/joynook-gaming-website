@@ -1,0 +1,25 @@
+export const SITE_CONFIG = {
+  name: "JoyNook",
+  title: "JoyNook - Play, Relax & Have Fun! | Free Online Games",
+  description:
+    "Play free satisfying games, fidget toys, relaxing puzzles, and creative tools instantly in your browser. No downloads, no registration required.",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://joynook-gaming-website.vercel.app",
+  ogImage: "https://joynook-gaming-website.vercel.app/og-image.png",
+  author: "JoyNook Team",
+  twitterHandle: "@joynookgames",
+  keywords: [
+    "free online games",
+    "relaxing games",
+    "fidget toys",
+    "bubble wrap game",
+    "puzzle games",
+    "2048 game",
+    "satisfying games",
+    "unwind games",
+    "browser games without download",
+    "pwa gaming web app",
+    "offline browser games",
+    "mindful games",
+    "instant play games",
+  ],
+};

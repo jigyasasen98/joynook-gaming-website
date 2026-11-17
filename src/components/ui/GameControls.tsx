@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { sounds } from "@/lib/soundEffects";
 import { useFavorites } from "@/hooks/useFavorites";
+import { triggerHaptic } from "@/lib/haptics";
+import { shareContent } from "@/lib/nativeBridge";
 
 interface GameControlsProps {
   gameSlug: string;
@@ -48,6 +50,7 @@ export function GameControls({
   }, []);
 
   const handleToggleSound = () => {
+    triggerHaptic("selection");
     const nextMuted = sounds.toggleMute();
     setIsMuted(nextMuted);
     if (!nextMuted) {
@@ -56,6 +59,7 @@ export function GameControls({
   };
 
   const handleToggleFullscreen = () => {
+    triggerHaptic("medium");
     sounds.uiClick();
     if (!document.fullscreenElement) {
       const target = containerRef?.current || document.documentElement;
@@ -72,6 +76,7 @@ export function GameControls({
   };
 
   const handleRestart = () => {
+    triggerHaptic("medium");
     sounds.uiClick();
     if (onRestart) {
       onRestart();
@@ -79,34 +84,23 @@ export function GameControls({
   };
 
   const handleFavorite = () => {
+    triggerHaptic("light");
     sounds.uiClick();
     toggleFavorite(gameSlug);
   };
 
   const handleShare = async () => {
+    triggerHaptic("selection");
     sounds.uiClick();
-    const shareData = {
+    const shared = await shareContent({
       title: `${gameTitle} - Play Free on JoyNook`,
       text: `Play ${gameTitle} instantly in your browser on JoyNook. No download needed!`,
       url: window.location.href,
-    };
+    });
 
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        return;
-      } catch {
-        // Fallback to clipboard
-      }
-    }
-
-    // Fallback: Copy link
-    try {
-      await navigator.clipboard.writeText(window.location.href);
+    if (shared) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Ignore
     }
   };
 

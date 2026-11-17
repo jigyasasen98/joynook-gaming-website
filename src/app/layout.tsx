@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { PwaRegistrar } from "@/components/pwa/PwaRegistrar";
 import { PwaInstallPrompt } from "@/components/pwa/PwaInstallPrompt";
+import { SITE_CONFIG } from "@/lib/siteConfig";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -10,30 +11,22 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://joynook.com"),
+  metadataBase: new URL(SITE_CONFIG.url),
   title: {
-    default: "JoyNook - Play, Relax & Have Fun! | Free Online Games",
-    template: "%s | JoyNook",
+    default: SITE_CONFIG.title,
+    template: `%s | ${SITE_CONFIG.name}`,
   },
-  description:
-    "Instant free browser games, fidget toys, relaxing puzzles, and creative art tools. Accessible to everyone, no downloads or registration required.",
-  keywords: [
-    "free online games",
-    "relaxing games",
-    "fidget toys",
-    "bubble wrap game",
-    "puzzle games",
-    "2048 game",
-    "satisfying games",
-    "unwind games",
-    "browser games without download",
-    "pwa gaming web app",
-  ],
-  authors: [{ name: "JoyNook Team" }],
-  creator: "JoyNook",
+  description: SITE_CONFIG.description,
+  keywords: SITE_CONFIG.keywords,
+  authors: [{ name: SITE_CONFIG.author }],
+  creator: SITE_CONFIG.name,
+  alternates: {
+    canonical: SITE_CONFIG.url,
+  },
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -48,26 +41,43 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "JoyNook",
+    title: SITE_CONFIG.name,
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://joynook.com",
-    title: "JoyNook - Play, Relax & Have Fun!",
-    description:
-      "Play free satisfying games, fidget toys, relaxing puzzles, and creative tools instantly in your browser.",
-    siteName: "JoyNook",
+    url: SITE_CONFIG.url,
+    title: SITE_CONFIG.title,
+    description: SITE_CONFIG.description,
+    siteName: SITE_CONFIG.name,
+    images: [
+      {
+        url: `${SITE_CONFIG.url}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: `${SITE_CONFIG.name} - Free Browser Games`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "JoyNook - Play, Relax & Have Fun!",
-    description:
-      "Play free satisfying games, fidget toys, relaxing puzzles, and creative tools instantly in your browser.",
+    title: SITE_CONFIG.title,
+    description: SITE_CONFIG.description,
+    images: [`${SITE_CONFIG.url}/og-image.png`],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
   },
 };
 
@@ -76,6 +86,28 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_CONFIG.name,
+    url: SITE_CONFIG.url,
+    description: SITE_CONFIG.description,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${SITE_CONFIG.url}/games?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: SITE_CONFIG.name,
+    url: SITE_CONFIG.url,
+    logo: `${SITE_CONFIG.url}/icons/icon-512.png`,
+    sameAs: [],
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -87,7 +119,17 @@ export default function RootLayout({
         />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="JoyNook" />
+        <meta name="apple-mobile-web-app-title" content={SITE_CONFIG.name} />
+        <meta name="format-detection" content="telephone=no" />
+        {/* Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
         {/* Prevent theme flicker script */}
         <script
           dangerouslySetInnerHTML={{
